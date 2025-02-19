@@ -16,5 +16,5 @@ cluster = "mainnet"
 wallet = "~/.config/solana/id.json"
 
 [programs.mainnet]
-spl_governance = "GovER5Lthms3bLBqWub97yVrMmEogzX7xNjdXpPPCVZw"
+spl_governance = "HwXcHGabc19PxzYFVSfKvuaDSNpbLGL8fhVtkcTyEymj" # Our own custom key
 spl_governance_chat = "gCHAtYKrUUktTVzE4hEnZdLV4LXrdBf6Hh9qMaJALET"
