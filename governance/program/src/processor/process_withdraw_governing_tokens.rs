@@ -10,7 +10,10 @@ use {
                 get_token_owner_record_address_seeds, get_token_owner_record_data_for_seeds,
             },
         },
-        tools::spl_token::{get_spl_token_mint, transfer_spl_tokens_signed},
+        tools::{
+            folio_program::FolioProgram,
+            spl_token::{get_spl_token_mint, transfer_spl_tokens_signed},
+        },
     },
     solana_program::{
         account_info::{next_account_info, AccountInfo},
@@ -70,6 +73,29 @@ pub fn process_withdraw_governing_tokens(
 
     token_owner_record_data.assert_can_withdraw_governing_tokens(clock.unix_timestamp)?;
 
+    /*
+    Since system program isn't sent in the withdrawing, we'll expect the first one extra account to
+    be the system program, then we proceed just like the deposit instruction
+     */
+    let system_info = next_account_info(account_info_iter)?; // 7
+
+    // 0-7 taken for the governance program instruction (see above)
+    // 8..14 are the accounts for the folio program instruction
+    let rest_of_accounts = &accounts[8..14];
+    // 14 + up to 5 x 4 are for the reward tokens
+    let reward_token_accounts = &accounts[14..];
+
+    FolioProgram::accrue_rewards(
+        system_info,
+        spl_token_info,
+        governing_token_owner_info,
+        governing_token_holding_info,
+        token_owner_record_info,
+        rest_of_accounts,
+        reward_token_accounts,
+    )?;
+
+    // Proceed with the governance code
     transfer_spl_tokens_signed(
         governing_token_holding_info,
         governing_token_destination_info,

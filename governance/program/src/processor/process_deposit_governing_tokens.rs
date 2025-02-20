@@ -12,9 +12,12 @@ use {
                 TokenOwnerRecordV2, TOKEN_OWNER_RECORD_LAYOUT_VERSION,
             },
         },
-        tools::spl_token::{
-            get_spl_token_mint, is_spl_token_account, is_spl_token_mint, mint_spl_tokens_to,
-            transfer_spl_tokens,
+        tools::{
+            folio_program::FolioProgram,
+            spl_token::{
+                get_spl_token_mint, is_spl_token_account, is_spl_token_mint, mint_spl_tokens_to,
+                transfer_spl_tokens,
+            },
         },
     },
     solana_program::{
@@ -102,7 +105,8 @@ pub fn process_deposit_governing_tokens(
             account_type: GovernanceAccountType::TokenOwnerRecordV2,
             realm: *realm_info.key,
             governing_token_owner: *governing_token_owner_info.key,
-            governing_token_deposit_amount: amount,
+            // First init to 0, because we have to call accrue_rewards first
+            governing_token_deposit_amount: 0,
             governing_token_mint,
             governance_delegate: None,
             unrelinquished_votes_count: 0,
@@ -123,20 +127,51 @@ pub fn process_deposit_governing_tokens(
             &rent,
             0,
         )?;
-    } else {
-        let mut token_owner_record_data = get_token_owner_record_data_for_seeds(
-            program_id,
-            token_owner_record_info,
-            &token_owner_record_address_seeds,
-        )?;
-
-        token_owner_record_data.governing_token_deposit_amount = token_owner_record_data
-            .governing_token_deposit_amount
-            .checked_add(amount)
-            .unwrap();
-
-        token_owner_record_data.serialize(&mut token_owner_record_info.data.borrow_mut()[..])?;
     }
+
+    // 0-9 taken for the governance program instruction (see above)
+    // 10..16 are the accounts for the folio program instruction
+    let rest_of_accounts = &accounts[10..16];
+    // 16 + up to 4 x 4 are for the reward tokens
+    let reward_token_accounts = &accounts[16..];
+
+    // Rest of remaining accounts expected
+    // 10: folio program
+    // 11: folio owner
+    // 12: actor of folio owner
+    // 13: folio
+    // 14: folio reward tokens
+    // 15: governing token mint
+    //
+    // Loop max 4 times
+    //
+    // 16: reward token mint
+    // 17: reward info for token mint
+    // 18: folio token rewards token account
+    // 19: reward info for caller
+    FolioProgram::accrue_rewards(
+        system_info,
+        spl_token_info,
+        governing_token_owner_info,
+        governing_token_holding_info,
+        token_owner_record_info,
+        rest_of_accounts,
+        reward_token_accounts,
+    )?;
+
+    // Then add the amount to the account
+    let mut token_owner_record_data = get_token_owner_record_data_for_seeds(
+        program_id,
+        token_owner_record_info,
+        &token_owner_record_address_seeds,
+    )?;
+
+    token_owner_record_data.governing_token_deposit_amount = token_owner_record_data
+        .governing_token_deposit_amount
+        .checked_add(amount)
+        .unwrap();
+
+    token_owner_record_data.serialize(&mut token_owner_record_info.data.borrow_mut()[..])?;
 
     Ok(())
 }
