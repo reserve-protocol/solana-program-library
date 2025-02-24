@@ -30,7 +30,9 @@ impl FolioProgram {
 
     /// Receives the remaining accounts from the instruction (expect in proper order), doesn't do validation as it's done on the Folio Program side.
     /// Only thing it will validate is the actual program being called is the Folio Program.
+    #[allow(clippy::too_many_arguments)]
     pub fn accrue_rewards<'a>(
+        realm_info: &AccountInfo<'a>,
         system_info: &AccountInfo<'a>,
         spl_token_info: &AccountInfo<'a>,
         // The caller of the instruction
@@ -66,6 +68,7 @@ impl FolioProgram {
             system_info.clone(),
             spl_token_info.clone(),
             governing_token_owner_info.clone(),
+            realm_info.clone(),
             folio_owner.clone(),
             actor.clone(),
             folio.clone(),
@@ -83,6 +86,7 @@ impl FolioProgram {
             AccountMeta::new_readonly(*system_info.key, false),
             AccountMeta::new_readonly(*spl_token_info.key, false),
             AccountMeta::new(*governing_token_owner_info.key, true),
+            AccountMeta::new_readonly(*realm_info.key, false),
             AccountMeta::new_readonly(*folio_owner.key, false),
             AccountMeta::new_readonly(*actor.key, false),
             AccountMeta::new_readonly(*folio.key, false),
