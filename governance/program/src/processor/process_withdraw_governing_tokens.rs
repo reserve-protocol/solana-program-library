@@ -86,6 +86,7 @@ pub fn process_withdraw_governing_tokens(
     let reward_token_accounts = &accounts[14..];
 
     FolioProgram::accrue_rewards(
+        realm_info,
         system_info,
         spl_token_info,
         governing_token_owner_info,

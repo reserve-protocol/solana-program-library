@@ -150,6 +150,7 @@ pub fn process_deposit_governing_tokens(
     // 18: folio token rewards token account
     // 19: reward info for caller
     FolioProgram::accrue_rewards(
+        realm_info,
         system_info,
         spl_token_info,
         governing_token_owner_info,
