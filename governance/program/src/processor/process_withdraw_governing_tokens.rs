@@ -11,7 +11,7 @@ use {
             },
         },
         tools::{
-            folio_program::FolioProgram,
+            rewards_program::RewardsProgram,
             spl_token::{get_spl_token_mint, transfer_spl_tokens_signed},
         },
     },
@@ -80,12 +80,12 @@ pub fn process_withdraw_governing_tokens(
     let system_info = next_account_info(account_info_iter)?; // 7
 
     // 0-7 taken for the governance program instruction (see above)
-    // 8..14 are the accounts for the folio program instruction
-    let rest_of_accounts = &accounts[8..14];
-    // 14 + up to 5 x 4 are for the reward tokens
-    let reward_token_accounts = &accounts[14..];
+    // 8..11 are the accounts for the rewards program instruction
+    let rest_of_accounts = &accounts[8..11];
+    // 11 + up to 4 x 4 are for the reward tokens
+    let reward_token_accounts = &accounts[11..];
 
-    FolioProgram::accrue_rewards(
+    RewardsProgram::accrue_rewards(
         realm_info,
         system_info,
         spl_token_info,

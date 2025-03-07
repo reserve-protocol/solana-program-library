@@ -549,9 +549,9 @@ pub enum GovernanceError {
     #[error("TokenOwnerRecordLockAuthority not found")]
     TokenOwnerRecordLockAuthorityNotFound, // 631
 
-    /// Invalid Folio Program
-    #[error("Invalid Folio Program")]
-    InvalidFolioProgram, // 632
+    /// Invalid Rewards Program
+    #[error("Invalid Rewards Program")]
+    InvalidRewardsProgram, // 632
 }
 
 impl PrintProgramError for GovernanceError {
