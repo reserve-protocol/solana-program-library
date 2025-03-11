@@ -13,7 +13,7 @@ use {
             },
         },
         tools::{
-            folio_program::FolioProgram,
+            rewards_program::RewardsProgram,
             spl_token::{
                 get_spl_token_mint, is_spl_token_account, is_spl_token_mint, mint_spl_tokens_to,
                 transfer_spl_tokens,
@@ -130,26 +130,23 @@ pub fn process_deposit_governing_tokens(
     }
 
     // 0-9 taken for the governance program instruction (see above)
-    // 10..16 are the accounts for the folio program instruction
-    let rest_of_accounts = &accounts[10..16];
-    // 16 + up to 4 x 4 are for the reward tokens
-    let reward_token_accounts = &accounts[16..];
+    // 10..13 are the accounts for the rewards program instruction
+    let rest_of_accounts = &accounts[10..13];
+    // 13 + up to 4 x 4 are for the reward tokens
+    let reward_token_accounts = &accounts[13..];
 
     // Rest of remaining accounts expected
-    // 10: folio program
-    // 11: folio owner
-    // 12: actor of folio owner
-    // 13: folio
-    // 14: folio reward tokens
-    // 15: governing token mint
+    // 10: rewards program
+    // 11: rewards reward tokens
+    // 12: governing token mint
     //
     // Loop max 4 times
     //
-    // 16: reward token mint
-    // 17: reward info for token mint
-    // 18: folio token rewards token account
-    // 19: reward info for caller
-    FolioProgram::accrue_rewards(
+    // 13: reward token mint
+    // 14: reward info for token mint
+    // 15: reward token rewards token account
+    // 16: reward info for caller
+    RewardsProgram::accrue_rewards(
         realm_info,
         system_info,
         spl_token_info,

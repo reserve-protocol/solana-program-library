@@ -8,4 +8,4 @@ pub mod pack;
 
 pub mod structs;
 
-pub mod folio_program;
+pub mod rewards_program;
